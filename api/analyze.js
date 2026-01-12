@@ -1,108 +1,108 @@
-// Vercel Serverless Function
-export default async function handler(req, res) {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+# 🍽️ BiteBalance - מנתח תזונה חכם
 
-  // Handle preflight
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
+אפליקציה לניתוח ארוחות ומתן המלצות תזונתיות מבוססות AI.
 
-  // Only allow POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+🎉 **משתמש ב-Google Gemini - חינמי לגמרי!**
 
-  try {
-    const { mealDescription } = req.body;
+## 🚀 פריסה ל-Vercel (חינמי!)
 
-    if (!mealDescription) {
-      return res.status(400).json({ error: 'Missing meal description' });
-    }
+### שלב 1: הכנה
+1. צור חשבון ב-[Vercel](https://vercel.com) (חינמי)
+2. צור חשבון ב-[Google AI Studio](https://aistudio.google.com) (חינמי)
 
-    // Get API key from environment variable
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+### שלב 2: קבל מפתח API של Gemini (חינמי!)
+1. גש ל-[Google AI Studio](https://aistudio.google.com/app/apikey)
+2. לחץ **"Create API Key"**
+3. בחר פרויקט קיים או צור חדש
+4. **העתק את המפתח** - זה נראה כך: `AIzaSy...`
+5. שמור את המפתח - תצטרך אותו בשלב הבא
 
-    if (!apiKey) {
-      return res.status(500).json({ error: 'API key not configured' });
-    }
+💡 **זה חינמי לגמרי! אין צורך בכרטיס אשראי!**
 
-    // Call Anthropic API
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000,
-        messages: [{
-          role: 'user',
-          content: `אתה תזונאי מומחה. נתח את הארוחה הבאה לפי הקווים המנחים של הולטר סוכר.
+### שלב 3: פריסה
 
-קווים מנחים:
-- תזונה מאוזנת עם עומס גליקמי נמוך
-- עדיפות למזון מלא ולא מעובד
-- איזון בין חלבונים, פחמימות מורכבות ושומנים בריאים
-- הימנעות ממזון מעובד, סוכר מוסף ופחמימות פשוטות
+#### אופציה A: דרך הממשק (מומלץ למתחילים)
+1. העלה את כל הקבצים ל-GitHub repository
+2. גש ל-[Vercel](https://vercel.com)
+3. לחץ על "Add New Project"
+4. בחר את ה-repository שלך
+5. בהגדרות Environment Variables הוסף:
+   - **שם**: `GEMINI_API_KEY`
+   - **ערך**: המפתח שקיבלת מ-Google AI Studio
+6. לחץ על "Deploy"
 
-ארוחה לניתוח: ${mealDescription}
+#### אופציה B: דרך CLI
+1. פתח terminal בתיקיית הפרויקט
+2. הרץ:
+   ```bash
+   vercel
+   ```
+3. עקוב אחר ההוראות
+4. הוסף את המפתח:
+   ```bash
+   vercel env add GEMINI_API_KEY
+   ```
+5. הדבק את המפתח של Gemini
+6. Deploy:
+   ```bash
+   vercel --prod
+   ```
 
-אנא ספק ניתוח מפורט בפורמט הבא בעברית (השתמש באימוג'ים):
+### שלב 4: זהו! 🎉
+האפליקציה שלך עכשיו חיה באינטרנט!
+Vercel ייתן לך כתובת URL כמו: `https://your-app-name.vercel.app`
 
-1. תיאור הארוחה
-2. דירוג כללי: [💫/⭐] - [אחוז] - [תיאור]
-3. האם כדאי לאכול: [Always ✅ / Sometimes ⚖️ / Never ❌]
-4. סיבת הדירוג (פסקה קצרה)
-5. פרמטרים של מזון:
-   - עומס גליקמי: [✅ נמוך / ⚠️ בינוני / 🚫 גבוה]
-   - גודל מנה: [🍽️ תיאור]
-   - איזון מקרו-נוטריאנטים: [תיאור]
-6. נוטריאנטים משוערים:
-   - אנרגיה: [קלוריות] קלוריות
-   - חלבון: [גרם]ג
-   - פחמימות: [גרם]ג
-   - סיבים תזונתיים: [רמה]
-   - שומנים: [גרם]ג
-   - שומן רווי: [רמה]
-   - נתרן: [כמות]
-7. תחליפים מומלצים (3-4 אפשרויות מרכזיות בלבד)
-8. נימוק לארוחה הבאה (שורה-שורה וחצי)
-9. המלצות לארוחה הבאה (3 אפשרויות):
-   - אופציה צמחונית: [תיאור]
-   - אופציה בשרית: [תיאור]
-   - אופציה דגים: [תיאור]
-10. סיכום והמלצות (2-3 נקודות)`
-        }]
-      })
-    });
+## 📁 מבנה הקבצים
 
-    const data = await response.json();
+```
+├── nutrition-analyzer.html    # האפליקציה הראשית
+├── vercel.json                # הגדרות Vercel
+└── api/
+    ├── analyze.js            # ניתוח ארוחות (Gemini)
+    ├── recognize.js          # זיהוי תמונות (Gemini)
+    └── recipe.js             # יצירת מתכונים (Gemini)
+```
 
-    if (!response.ok) {
-      throw new Error(data.error?.message || 'API request failed');
-    }
+## ⚙️ איך זה עובד?
 
-    // Return the analysis
-    res.status(200).json({
-      success: true,
-      analysis: data.content[0].text
-    });
+1. **Frontend** (HTML) - מריץ בדפדפן של המשתמש
+2. **Serverless Functions** (api/*.js) - רצות ב-Vercel
+3. **Google Gemini API** - מספק את ה-AI (חינמי!)
 
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ 
-      success: false,
-      error: error.message || 'Internal server error' 
-    });
-  }
-}
+המפתח נשמר בצורה מאובטחת ב-Vercel ולא נחשף למשתמשים!
+
+## 💰 עלויות
+
+- **Vercel**: חינמי לגמרי לפרויקטים אישיים
+- **Google Gemini**: 
+  - ✅ **חינמי לגמרי!**
+  - ✅ 15 בקשות לדקה
+  - ✅ 1,500 בקשות ליום
+  - ✅ ללא צורך בכרטיס אשראי
+  - ✅ מספיק למאות משתמשים
+
+## 🔒 אבטחה
+
+- מפתח ה-API נשמר רק בשרת (Vercel)
+- המשתמשים לא יכולים לראות או לגשת למפתח
+- כל הקריאות ל-API עוברות דרך השרת שלך
+
+## 🛠️ פתרון בעיות
+
+**בעיה**: "API key not configured"
+- **פתרון**: וודא שהוספת את `GEMINI_API_KEY` ב-Environment Variables
+
+**בעיה**: האפליקציה לא עובדת
+- **פתרון**: בדוק ב-Vercel Logs (Dashboard → Your Project → Logs)
+
+**בעיה**: שגיאה 429 (Too Many Requests)
+- **פתרון**: המתן מעט - הגעת למגבלת ה-API (15 בקשות לדקה)
+
+## 📞 תמיכה
+
+- [Vercel Docs](https://vercel.com/docs)
+- [Google AI Studio Docs](https://ai.google.dev/tutorials/get_started_web)
+
+---
+
+**נוצר עם ❤️ בעזרת Claude**
